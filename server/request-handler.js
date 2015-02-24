@@ -10,6 +10,8 @@ this file and include it in basic-server.js so that it actually works.
 
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 **************************************************************/
+resultsObj = {results: []}; // When a GET request comes in we need to reinitialize
+var fs = require("fs");
 
 exports.requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -27,23 +29,37 @@ exports.requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log("Serving request type " + request.method + " for url " + request.url);
-  var resultsObj = {results: []};
+  
   if (request.method === 'POST') {
     var chunk = '';
     request.on('data', function(data) {
       //resultsObj.results.push(data);      
       chunk += data;
+      console.log(chunk);
     });
 
     request.on('end', function(){
       var post = JSON.parse(chunk);
       resultsObj.results.push(post);
     });
-    
+      console.log(resultsObj.results);
+
     response.writeHead(201, headers);
     response.end(JSON.stringify(resultsObj));
   }
 
+  fs.stat(request.url, function (err, stats) {
+    if (err) {
+      response.writeHead(404, headers);
+      response.end(JSON.stringify(resultsObj));
+    }
+  });
+
+  // fs.exists(request.url, function(exists) {
+  //   if (!exists) {
+  //     response.writeHead(404, headers);
+  //   }
+  // })
   // The outgoing status.
   var statusCode = 200;
 
