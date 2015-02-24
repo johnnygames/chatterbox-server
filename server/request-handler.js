@@ -27,10 +27,21 @@ exports.requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log("Serving request type " + request.method + " for url " + request.url);
-
+  var resultsObj = {results: []};
   if (request.method === 'POST') {
+    var chunk = '';
+    request.on('data', function(data) {
+      //resultsObj.results.push(data);      
+      chunk += data;
+    });
+
+    request.on('end', function(){
+      var post = JSON.parse(chunk);
+      resultsObj.results.push(post);
+    });
+    
     response.writeHead(201, headers);
-    response.end(JSON.stringify({results: []}));
+    response.end(JSON.stringify(resultsObj));
   }
 
   // The outgoing status.
@@ -56,7 +67,7 @@ exports.requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end(JSON.stringify({results: []}));
+  response.end(JSON.stringify(resultsObj));
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
