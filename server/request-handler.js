@@ -8,10 +8,12 @@ var defaultCorsHeaders = {
 
 resultsObj = {results: []}; // When a GET request comes in we need to reinitialize
 var fs = require("fs");
+var objId = 0;
 
 exports.requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   console.log("Serving request type " + request.method + " for url " + request.url);
+
   var headers = defaultCorsHeaders;
   if (request.method === 'POST') {
     var chunk = '';
@@ -22,11 +24,13 @@ exports.requestHandler = function(request, response) {
 
     request.on('end', function(){
       var post = JSON.parse(chunk);
+      post['objectId'] = objId;
+      objId++;
       resultsObj.results.push(post);
     });
     response.writeHead(201, headers);
     response.end(JSON.stringify(resultsObj));
-    console.log(headers)
+    console.log(resultsObj.results);
   }
 
   if (request.method === 'GET') {   
@@ -40,17 +44,17 @@ exports.requestHandler = function(request, response) {
   }
 
   if (request.method === 'OPTIONS') {   
-    var chunk = '';
-    request.on('data', function(data) {
-      //resultsObj.results.push(data);      
-      chunk += data;
-    });
+    // var chunk = '';
+    // request.on('data', function(data) {
+    //   //resultsObj.results.push(data);      
+    //   chunk += data;
+    // });
 
-    request.on('end', function(){
-      var post = JSON.parse(chunk);
-      resultsObj.results.push(post);
-    });
-    response.writeHead(201, headers);
+    // request.on('end', function(){
+    //   var post = JSON.parse(chunk);
+    //   resultsObj.results.push(post);
+    // });
+    response.writeHead(200, headers);
     response.end(JSON.stringify(resultsObj));
     console.log(headers)
   }
